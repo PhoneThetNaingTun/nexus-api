@@ -13,6 +13,8 @@ import { DoctorsModule } from './features/doctors/doctors.module';
 import { MedicinesModule } from './features/medicines/medicines.module';
 import { AppointmentsModule as AdminAppointmentsModule } from './features/user/appointments/appointments.module';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
+import { MedicalRecordsModule } from './features/medical-records/medical-records.module';
+import { PrescriptionsModule } from './features/prescriptions/prescriptions.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module';
     MedicinesModule,
     AppointmentsModule,
     AdminAppointmentsModule,
+    MedicalRecordsModule,
+    PrescriptionsModule,
   ],
   controllers: [AppController],
   providers: [
