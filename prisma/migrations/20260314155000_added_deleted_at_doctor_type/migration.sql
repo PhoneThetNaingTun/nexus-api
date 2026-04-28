@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "DoctorType" ADD COLUMN     "deletedAt" TIMESTAMP(3);

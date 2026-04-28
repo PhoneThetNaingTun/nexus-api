@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  DOCTOR
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  password String
+  name     String?
+  role     Role    @default(USER)
+  image    String?
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+  tokens         Token[]
+  doctorProfiles DoctorProfile?
+  appointments   Appointment[]
+}
+
+model Token {
+  id        String   @id @default(cuid())
+  token     String
+  user_id   String
+  expiredAt DateTime
+  jti       String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@index([jti])
+}
+
+model DoctorType {
+  id             String          @id @default(cuid())
+  name           String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  doctorProfiles DoctorProfile[]
+}
+
+model Medicine {
+  id       String       @id @default(cuid())
+  name     String
+  strength String
+  form     MedicineForm @default(TABLET)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id])
+
+  requiresPrescription Boolean @default(true)
+  sideEffects          String? @db.Text
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([brandId])
+  @@index([categoryId])
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+  medicines Medicine[]
+}
+
+model Brand {
+  id        String     @id @default(cuid())
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+  medicines Medicine[]
+}
+
+enum MedicineForm {
+  TABLET
+  CAPSULE
+  SYRUP
+  INJECTION
+  CREAM
+  DROPS
+  INHALER
+}
+
+model DoctorProfile {
+  id           String        @id @default(cuid())
+  type_id      String
+  type         DoctorType    @relation(fields: [type_id], references: [id])
+  user_id      String        @unique
+  user         User          @relation(fields: [user_id], references: [id])
+  bio          String?        @db.Text
+  fee          Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  schedules    Schedule[]
+  appointments Appointment[]
+}
+
+model Schedule {
+  id        String        @id @default(cuid())
+  doctor_id String
+  doctor    DoctorProfile @relation(fields: [doctor_id], references: [id])
+
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  slotDuration Int    @default(30)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([doctor_id, dayOfWeek])
+}
+
+model Appointment {
+  id              String            @id @default(cuid())
+  patientId       String
+  doctorId        String
+  appointmentTime DateTime
+  status          AppointmentStatus @default(PENDING)
+  notes           String?           @db.Text
+
+  actualStartTime DateTime?
+  actualEndTime   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  doctor  DoctorProfile @relation(fields: [doctorId], references: [id])
+  patient User          @relation(fields: [patientId], references: [id])
+
+  @@unique([doctorId, appointmentTime])
+  @@index([appointmentTime])
+}

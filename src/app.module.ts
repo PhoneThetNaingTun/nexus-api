@@ -1,0 +1,45 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { HttpExceptionFilter } from './common/exceptions/http.exception';
+import { PrismaExceptionFilter } from './common/exceptions/prisma.exception';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { AppointmentsModule } from './features/appointments/appointments.module';
+import { AuthModule } from './features/auth/auth.module';
+import { JWTGuard } from './features/auth/guards/jwt.guard';
+import { DoctorsModule } from './features/doctors/doctors.module';
+import { MedicinesModule } from './features/medicines/medicines.module';
+import { AppointmentsModule as AdminAppointmentsModule } from './features/user/appointments/appointments.module';
+import { PrismaModule } from './infrastructure/prisma/prisma.module';
+
+@Module({
+  imports: [
+    PrismaModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
+    DoctorsModule,
+    MedicinesModule,
+    AppointmentsModule,
+    AdminAppointmentsModule,
+  ],
+  controllers: [AppController],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: JWTGuard },
+    {
+      provide: APP_FILTER,
+      useClass: PrismaExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
+  ],
+})
+export class AppModule {}
