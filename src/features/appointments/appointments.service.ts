@@ -36,6 +36,20 @@ export class AppointmentsService {
             type: true,
           },
         },
+        medicalRecord: {
+          include: {
+            prescriptions: {
+              include: {
+                medicine: {
+                  include: {
+                    brand: true,
+                    category: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
     if (!appointment) {

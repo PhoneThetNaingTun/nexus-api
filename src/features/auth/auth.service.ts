@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import argon from 'argon2';
@@ -26,6 +30,9 @@ export class AuthService {
 
     if (isUser && isExist.role !== 'USER') {
       throw new NotFoundException('User not found');
+    }
+    if (!isUser && isExist.role === 'USER') {
+      throw new ForbiddenException('Forbidden');
     }
     const isMatch = await argon.verify(isExist.password, dto.password);
     if (!isMatch) {
