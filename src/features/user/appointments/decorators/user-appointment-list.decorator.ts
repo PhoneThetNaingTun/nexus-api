@@ -5,6 +5,7 @@ export const UserAppointmentListQuery = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     const search = request.query.search || '';
     const date = request.query.date || '';
-    return { search, date };
+    const status = request.query.status || '';
+    return { search, date, status };
   },
 );

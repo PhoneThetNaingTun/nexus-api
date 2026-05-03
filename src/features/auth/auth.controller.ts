@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import { type Response } from 'express';
 import { AuthService } from './auth.service';
 import { User } from './decorators/get-user.decorators';
 import { isPublic } from './decorators/is-public.decorators';
@@ -37,5 +38,13 @@ export class AuthController {
   @UseGuards(JWTRefreshGuard)
   async refresh(@User() dto: JWTRefreshPayload) {
     return this.authService.refresh(dto);
+  }
+
+  @Post('logout')
+  async logout(
+    @User() dto: JWTPayload,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.logout(res, dto);
   }
 }
