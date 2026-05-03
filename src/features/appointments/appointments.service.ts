@@ -4,7 +4,11 @@ import { Prisma, Role } from 'generated/prisma/client';
 import { PaginationDto } from 'src/common/dto';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { JWTPayload } from '../auth/strategry/jwt.strategy';
-import { AppointmentApproveDto, AppointmentRejectDto } from './dto';
+import {
+  AppointmentApproveDto,
+  AppointmentRejectDto,
+  AppointmentUpdateStatusDto,
+} from './dto';
 import { AppointmentListQueryDto } from './dto/appointmnt-list-query.dto';
 
 @Injectable()
@@ -44,6 +48,16 @@ export class AppointmentsService {
                   include: {
                     brand: true,
                     category: true,
+                    prescriptions: {
+                      include: {
+                        medicine: {
+                          include: {
+                            brand: true,
+                            category: true,
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -75,6 +89,16 @@ export class AppointmentsService {
     const updatedAppointment = await this.prisma.appointment.update({
       where: { id: data.id },
       data: { status: 'CANCELLED' },
+    });
+    return { data: updatedAppointment };
+  }
+
+  async updateStatus(id: string, dto: AppointmentUpdateStatusDto) {
+    const { data } = await this.findOne(id);
+
+    const updatedAppointment = await this.prisma.appointment.update({
+      where: { id: data.id },
+      data: { status: dto.status },
     });
     return { data: updatedAppointment };
   }
