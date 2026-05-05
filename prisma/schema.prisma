@@ -209,11 +209,34 @@ model Prescription {
   medicineId String
   medicine   Medicine @relation(fields: [medicineId], references: [id])
 
-  dosage        String 
-  frequency     String 
-  duration      String 
-  totalQuantity Int 
+  dosage        String
+  frequency     String
+  duration      String
+  totalQuantity Int
 
   instructions String? @db.Text
 }
 
+model MedicalPackageItem {
+  id   String @id @default(cuid())
+  name String @unique 
+
+  medicalPackages MedicalPackage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model MedicalPackage {
+  id          String  @id @default(cuid())
+  name        String
+  description String? @db.Text
+  price       Float
+  isActive    Boolean @default(true)
+
+  medicalPackageItems MedicalPackageItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
