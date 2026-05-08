@@ -10,12 +10,13 @@ import { AppointmentsModule } from './features/appointments/appointments.module'
 import { AuthModule } from './features/auth/auth.module';
 import { JWTGuard } from './features/auth/guards/jwt.guard';
 import { DoctorsModule } from './features/doctors/doctors.module';
-import { MedicinesModule } from './features/medicines/medicines.module';
-import { AppointmentsModule as AdminAppointmentsModule } from './features/user/appointments/appointments.module';
-import { PrismaModule } from './infrastructure/prisma/prisma.module';
-import { MedicalRecordsModule } from './features/medical-records/medical-records.module';
-import { PrescriptionsModule } from './features/prescriptions/prescriptions.module';
 import { MedicalPackagesModule } from './features/medical-packages/medical-packages.module';
+import { MedicalRecordsModule } from './features/medical-records/medical-records.module';
+import { MedicinesModule } from './features/medicines/medicines.module';
+import { PrescriptionsModule } from './features/prescriptions/prescriptions.module';
+import { AppointmentsModule as AdminAppointmentsModule } from './features/user/appointments/appointments.module';
+import { MedicalPackagesModule as UserMedicalPackagesModule } from './features/user/medical-packages/medical-packages.module';
+import { PrismaModule } from './infrastructure/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MedicalPackagesModule } from './features/medical-packages/medical-packa
     MedicalRecordsModule,
     PrescriptionsModule,
     MedicalPackagesModule,
+    UserMedicalPackagesModule,
   ],
   controllers: [AppController],
   providers: [
