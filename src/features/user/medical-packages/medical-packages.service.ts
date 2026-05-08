@@ -2,11 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'generated/prisma/client';
 import { PaginationDto } from 'src/common/dto';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
-import {
-  CreateMedicalPackageDto,
-  MedicalPackageListQueryDto,
-  UpdateMedicalPackageDto,
-} from './dto';
+import { UserMedicalPackageListQueryDto } from './dto';
 
 @Injectable()
 export class MedicalPackagesService {
@@ -21,47 +17,10 @@ export class MedicalPackagesService {
     return { data: medicalPackage };
   }
 
-  async createOne(dto: CreateMedicalPackageDto) {
-    const { medicalPackageItemIds, ...rest } = dto;
-    const medicalPackage = await this.prisma.medicalPackage.create({
-      data: {
-        ...rest,
-        medicalPackageItems: {
-          connect: medicalPackageItemIds.map((id) => ({ id })),
-        },
-      },
-    });
-    return { data: medicalPackage };
-  }
-  async updateOne(id: string, dto: UpdateMedicalPackageDto) {
-    const { data } = await this.findOne(id);
-
-    const { medicalPackageItemIds, ...rest } = dto;
-
-    const updatedMedicalPackage = await this.prisma.medicalPackage.update({
-      where: { id: data.id },
-      data: {
-        ...rest,
-        ...(medicalPackageItemIds && {
-          medicalPackageItems: {
-            set: medicalPackageItemIds.map((id) => ({ id })),
-          },
-        }),
-      },
-    });
-    return { data: updatedMedicalPackage };
-  }
-
-  async softDeleteOne(id: string) {
-    const { data } = await this.findOne(id);
-    const deleteMedicalPackage = await this.prisma.medicalPackage.update({
-      where: { id: data.id },
-      data: { deletedAt: new Date() },
-    });
-    return { data: deleteMedicalPackage };
-  }
-
-  async findAll(pagination: PaginationDto, query: MedicalPackageListQueryDto) {
+  async findAll(
+    pagination: PaginationDto,
+    query: UserMedicalPackageListQueryDto,
+  ) {
     const { search } = query;
     const { pageSize, skip } = pagination;
 
@@ -76,6 +35,7 @@ export class MedicalPackagesService {
 
     const where: Prisma.MedicalPackageWhereInput = {
       ...searchFilter,
+      isActive: true,
       deletedAt: null,
     };
 
