@@ -17,6 +17,7 @@ import { PrescriptionsModule } from './features/prescriptions/prescriptions.modu
 import { AppointmentsModule as AdminAppointmentsModule } from './features/user/appointments/appointments.module';
 import { MedicalPackagesModule as UserMedicalPackagesModule } from './features/user/medical-packages/medical-packages.module';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
+import { UserPackagesModule } from './features/user-packages/user-packages.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module';
     PrescriptionsModule,
     MedicalPackagesModule,
     UserMedicalPackagesModule,
+    UserPackagesModule,
   ],
   controllers: [AppController],
   providers: [

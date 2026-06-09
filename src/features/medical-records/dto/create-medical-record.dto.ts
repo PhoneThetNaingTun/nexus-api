@@ -17,8 +17,8 @@ export class CreateMedicalRecordDto {
   patientId!: string;
 
   @IsString()
-  @IsNotEmpty()
-  appointmentId!: string;
+  @IsOptional()
+  appointmentId?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -44,4 +44,8 @@ export class CreateMedicalRecordDto {
   @IsString()
   @IsOptional()
   advice?: string;
+
+  @IsString()
+  @IsOptional()
+  userPackageId?: string;
 }

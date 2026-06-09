@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { PackageStatus } from 'generated/prisma/client';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { CreateMedicalRecordDto, UpdateMedicalRecordDto } from './dto';
 
@@ -28,6 +29,7 @@ export class MedicalRecordsService {
       advice,
       doctorId,
       patientId,
+      userPackageId,
     } = dto;
     const medicalRecord = await this.prisma.medicalRecord.create({
       data: {
@@ -40,8 +42,16 @@ export class MedicalRecordsService {
         advice,
         doctorId,
         patientId,
+        userPackageId,
       },
     });
+
+    if (userPackageId) {
+      await this.prisma.userPackage.update({
+        where: { id: userPackageId },
+        data: { status: PackageStatus.USED },
+      });
+    }
 
     return { data: medicalRecord };
   }

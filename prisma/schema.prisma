@@ -42,6 +42,7 @@ model User {
   doctorProfiles DoctorProfile?
   appointments   Appointment[]
   medicalRecords MedicalRecord[]
+  userPackages   UserPackage[]
 }
 
 model Token {
@@ -182,6 +183,9 @@ model MedicalRecord {
   appointmentId String?      @unique
   appointment   Appointment? @relation(fields: [appointmentId], references: [id])
 
+  userPackageId String?      @unique
+  userPackage   UserPackage? @relation(fields: [userPackageId], references: [id])
+
   patientId String
   patient   User   @relation(fields: [patientId], references: [id])
 
@@ -219,12 +223,12 @@ model Prescription {
 
 model MedicalPackageItem {
   id   String @id @default(cuid())
-  name String @unique 
+  name String @unique
 
   medicalPackages MedicalPackage[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 }
 
@@ -237,7 +241,39 @@ model MedicalPackage {
 
   medicalPackageItems MedicalPackageItem[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  userPackages UserPackage[]
+}
+
+model UserPackage {
+  id String @id @default(cuid())
+
+  packageId String
+  package   MedicalPackage @relation(fields: [packageId], references: [id])
+
+  patientId String
+  patient   User   @relation(fields: [patientId], references: [id])
+
+  purchasedPrice Float
+
+  paymentScreenshot String?
+
+  status       PackageStatus @default(PENDING)
+  purchaseDate DateTime      @default(now())
+  expiryDate   DateTime?
+
+  usedAt DateTime?
+
+  medicalRecord MedicalRecord?
+}
+
+enum PackageStatus {
+  PENDING
+  PURCHASED
+  USED
+  EXPIRED
+  REFUNDED
+  REJECTED
 }

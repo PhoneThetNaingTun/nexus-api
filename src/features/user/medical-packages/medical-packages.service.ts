@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { addMonths } from 'date-fns';
 import { Prisma } from 'generated/prisma/client';
 import { PaginationDto } from 'src/common/dto';
+import { JWTPayload } from 'src/features/auth/strategry/jwt.strategy';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { UserMedicalPackageListQueryDto } from './dto';
+import { CreateUserMedicalPackageDto } from './dto/create-user-medical-package.dto';
 
 @Injectable()
 export class MedicalPackagesService {
@@ -10,6 +13,9 @@ export class MedicalPackagesService {
   async findOne(id: string) {
     const medicalPackage = await this.prisma.medicalPackage.findUnique({
       where: { id },
+      include: {
+        medicalPackageItems: true,
+      },
     });
     if (!medicalPackage) {
       throw new NotFoundException('Medical package not found');
@@ -53,5 +59,23 @@ export class MedicalPackagesService {
     const totalPages = Math.ceil(totalCount / pageSize);
 
     return { data: medicalPackages, totalCount, totalPages };
+  }
+
+  async buyMedicalPackage(user: JWTPayload, dto: CreateUserMedicalPackageDto) {
+    const expiryDate = addMonths(new Date(), 1);
+
+    const { data: medicalPackage } = await this.findOne(dto.packageId);
+
+    const userMedicalPackage = await this.prisma.userPackage.create({
+      data: {
+        patientId: user.sub,
+        packageId: dto.packageId,
+        expiryDate: expiryDate,
+        paymentScreenshot: dto.paymentScreenshot,
+        purchasedPrice: medicalPackage.price,
+      },
+    });
+
+    return { data: userMedicalPackage };
   }
 }
