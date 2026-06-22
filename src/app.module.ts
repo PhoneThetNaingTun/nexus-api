@@ -18,6 +18,7 @@ import { AppointmentsModule as AdminAppointmentsModule } from './features/user/a
 import { MedicalPackagesModule as UserMedicalPackagesModule } from './features/user/medical-packages/medical-packages.module';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
 import { UserPackagesModule } from './features/user-packages/user-packages.module';
+import { MedicalPackageHistoryModule } from './features/user/medical-package-history/medical-package-history.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { UserPackagesModule } from './features/user-packages/user-packages.modul
     MedicalPackagesModule,
     UserMedicalPackagesModule,
     UserPackagesModule,
+    MedicalPackageHistoryModule,
   ],
   controllers: [AppController],
   providers: [
