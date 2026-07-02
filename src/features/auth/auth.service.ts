@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import argon from 'argon2';
 import { addDays } from 'date-fns';
+import { Response } from 'express';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import { LoginDto, RegisterDto } from './dto';
@@ -26,6 +31,9 @@ export class AuthService {
 
     if (isUser && isExist.role !== 'USER') {
       throw new NotFoundException('User not found');
+    }
+    if (!isUser && isExist.role === 'USER') {
+      throw new ForbiddenException('Forbidden');
     }
     const isMatch = await argon.verify(isExist.password, dto.password);
     if (!isMatch) {
@@ -110,6 +118,17 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
     return { data: isExist };
+  }
+
+  async logout(res: Response, payload: JWTPayload) {
+    await this.prisma.token.deleteMany({
+      where: { user_id: payload.sub },
+    });
+
+    res.cookie('refresh_token', '', { maxAge: 0 });
+    res.cookie('access_token', '', { maxAge: 0 });
+
+    return { message: 'Logout successfully' };
   }
 
   async generateTokens(payload: JWTPayload) {

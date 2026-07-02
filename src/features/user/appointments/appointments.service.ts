@@ -39,6 +39,20 @@ export class AppointmentsService {
             type: true,
           },
         },
+        medicalRecord: {
+          include: {
+            prescriptions: {
+              include: {
+                medicine: {
+                  include: {
+                    brand: true,
+                    category: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
     if (!appointment) {
@@ -80,12 +94,13 @@ export class AppointmentsService {
     paginationDto: PaginationDto,
     query: UserAppointmentListQueryDto,
   ) {
-    const { date } = query;
+    const { date, status } = query;
     const { sub } = user;
     const { skip, pageSize } = paginationDto;
 
     const where: Prisma.AppointmentWhereInput = {
       patientId: sub,
+      ...(status && { status }),
     };
 
     if (date) {

@@ -5,7 +5,11 @@ import { User } from '../auth/decorators/get-user.decorators';
 import { type JWTPayload } from '../auth/strategry/jwt.strategy';
 import { AppointmentsService } from './appointments.service';
 import { AppointmentListQuery } from './decorators/appointment-list.decorator';
-import { AppointmentApproveDto, AppointmentRejectDto } from './dto';
+import {
+  AppointmentApproveDto,
+  AppointmentRejectDto,
+  AppointmentUpdateStatusDto,
+} from './dto';
 import { AppointmentListQueryDto } from './dto/appointmnt-list-query.dto';
 
 @Controller('admin/appointments')
@@ -24,6 +28,14 @@ export class AppointmentsController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return await this.appointmentsService.findOne(id);
+  }
+
+  @Post('/:id/status')
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() dto: AppointmentUpdateStatusDto,
+  ) {
+    return await this.appointmentsService.updateStatus(id, dto);
   }
 
   @Post('approve')

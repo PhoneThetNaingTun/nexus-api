@@ -10,9 +10,15 @@ import { AppointmentsModule } from './features/appointments/appointments.module'
 import { AuthModule } from './features/auth/auth.module';
 import { JWTGuard } from './features/auth/guards/jwt.guard';
 import { DoctorsModule } from './features/doctors/doctors.module';
+import { MedicalPackagesModule } from './features/medical-packages/medical-packages.module';
+import { MedicalRecordsModule } from './features/medical-records/medical-records.module';
 import { MedicinesModule } from './features/medicines/medicines.module';
+import { PrescriptionsModule } from './features/prescriptions/prescriptions.module';
 import { AppointmentsModule as AdminAppointmentsModule } from './features/user/appointments/appointments.module';
+import { MedicalPackagesModule as UserMedicalPackagesModule } from './features/user/medical-packages/medical-packages.module';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
+import { UserPackagesModule } from './features/user-packages/user-packages.module';
+import { MedicalPackageHistoryModule } from './features/user/medical-package-history/medical-package-history.module';
 
 @Module({
   imports: [
@@ -23,6 +29,12 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module';
     MedicinesModule,
     AppointmentsModule,
     AdminAppointmentsModule,
+    MedicalRecordsModule,
+    PrescriptionsModule,
+    MedicalPackagesModule,
+    UserMedicalPackagesModule,
+    UserPackagesModule,
+    MedicalPackageHistoryModule,
   ],
   controllers: [AppController],
   providers: [
