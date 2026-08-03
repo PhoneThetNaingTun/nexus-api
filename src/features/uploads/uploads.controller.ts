@@ -20,13 +20,10 @@ export class UploadsController {
       throw new BadRequestException('No file uploaded');
     }
 
-    const url = this.uploadsService.getPublicUrl(file.filename);
-
     return {
       data: {
         message: 'Image uploaded successfully',
-        url,
-        filename: file.filename,
+        key: file.filename,
       },
     };
   }

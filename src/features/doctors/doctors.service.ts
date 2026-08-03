@@ -7,11 +7,15 @@ import argon from 'argon2';
 import { Prisma } from 'generated/prisma/client';
 import { PaginationDto } from 'src/common/dto';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { CreateDoctorDto, DoctorListQueryDto, UpdateDoctorDto } from './dto';
 
 @Injectable()
 export class DoctorsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly uploadsService: UploadsService,
+  ) {}
 
   async findOne(id: string) {
     const doctor = await this.prisma.doctorProfile.findUnique({
@@ -57,7 +61,7 @@ export class DoctorsService {
           email,
           password: hashedPassword,
           role: 'DOCTOR',
-          image: image_url,
+          image: this.uploadsService.getImageKey(image_url),
         },
       });
       const doctorProfile = await tx.doctorProfile.create({
@@ -91,7 +95,7 @@ export class DoctorsService {
         where: { id: data.user.id },
         data: {
           name,
-          image: image_url,
+          image: this.uploadsService.getImageKey(image_url),
         },
       });
       return updatedDoctor;

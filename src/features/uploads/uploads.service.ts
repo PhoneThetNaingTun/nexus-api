@@ -3,11 +3,14 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class UploadsService {
   /**
-   * Generates a public URL for an uploaded file.
-   * @param filename The name of the file on disk.
-   * @returns The relative public URL of the file.
+   * Reduces an uploaded image value to the filename stored on disk.
+   * This also keeps create/update requests from persisting a public origin.
    */
-  getPublicUrl(filename: string): string {
-    return `/uploads/images/${filename}`;
+  getImageKey(image?: string): string | undefined {
+    const value = image?.trim();
+    if (!value) return undefined;
+
+    const path = value.split(/[?#]/, 1)[0].replace(/\\/g, '/');
+    return path.split('/').filter(Boolean).at(-1);
   }
 }
