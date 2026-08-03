@@ -21,6 +21,7 @@ import { UserPackagesModule } from './features/user-packages/user-packages.modul
 import { ReportsModule } from './features/reports/reports.module';
 import { MedicalPackageHistoryModule } from './features/user/medical-package-history/medical-package-history.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
+import { UploadsModule } from './features/uploads/uploads.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { DashboardModule } from './features/dashboard/dashboard.module';
     MedicalPackageHistoryModule,
     ReportsModule,
     DashboardModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [

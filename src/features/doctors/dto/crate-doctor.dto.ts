@@ -37,4 +37,8 @@ export class CreateDoctorDto {
   @IsString()
   @IsOptional()
   bio?: string;
+
+  @IsString()
+  @IsOptional()
+  image_url?: string;
 }

@@ -40,7 +40,7 @@ export class DoctorsService {
   }
 
   async createOne(dto: CreateDoctorDto) {
-    const { name, email, password, type_id, bio, fee } = dto;
+    const { name, email, password, type_id, bio, fee, image_url } = dto;
     const isUserExist = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -57,6 +57,7 @@ export class DoctorsService {
           email,
           password: hashedPassword,
           role: 'DOCTOR',
+          image: image_url,
         },
       });
       const doctorProfile = await tx.doctorProfile.create({
@@ -74,7 +75,7 @@ export class DoctorsService {
   }
 
   async updateOne(id: string, dto: UpdateDoctorDto) {
-    const { name, type_id, bio, fee } = dto;
+    const { name, type_id, bio, fee, image_url } = dto;
     const { data } = await this.findOne(id);
 
     const updatedDoctor = await this.prisma.$transaction(async (tx) => {
@@ -90,6 +91,7 @@ export class DoctorsService {
         where: { id: data.user.id },
         data: {
           name,
+          image: image_url,
         },
       });
       return updatedDoctor;
