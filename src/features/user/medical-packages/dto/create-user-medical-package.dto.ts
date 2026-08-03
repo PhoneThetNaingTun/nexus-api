@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class CreateUserMedicalPackageDto {
   @IsString()
@@ -6,6 +6,7 @@ export class CreateUserMedicalPackageDto {
   packageId!: string;
 
   @IsString()
-  @IsOptional()
-  paymentScreenshot?: string;
+  @IsNotEmpty()
+  @Matches(/\S/, { message: 'paymentScreenshot must not be blank' })
+  paymentScreenshot!: string;
 }
