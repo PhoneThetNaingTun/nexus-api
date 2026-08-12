@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { endOfDay, startOfDay } from 'date-fns';
-import { Prisma, Role } from 'generated/prisma/client';
+import { AppointmentStatus, Prisma, Role } from 'generated/prisma/client';
 import { PaginationDto } from 'src/common/dto';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { JWTPayload } from '../auth/strategry/jwt.strategy';
@@ -95,10 +95,19 @@ export class AppointmentsService {
 
   async updateStatus(id: string, dto: AppointmentUpdateStatusDto) {
     const { data } = await this.findOne(id);
+    const now = new Date();
+
+    const timingData: Prisma.AppointmentUpdateInput = {};
+    if (dto.status === AppointmentStatus.CHECKING && !data.actualStartTime) {
+      timingData.actualStartTime = now;
+    }
+    if (dto.status === AppointmentStatus.COMPLETED && !data.actualEndTime) {
+      timingData.actualEndTime = now;
+    }
 
     const updatedAppointment = await this.prisma.appointment.update({
       where: { id: data.id },
-      data: { status: dto.status },
+      data: { status: dto.status, ...timingData },
     });
     return { data: updatedAppointment };
   }

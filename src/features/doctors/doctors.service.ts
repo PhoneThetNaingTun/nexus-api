@@ -129,7 +129,7 @@ export class DoctorsService {
   }
 
   async findAll(pagination: PaginationDto, query: DoctorListQueryDto) {
-    const { search } = query;
+    const { search, typeId } = query;
     const { pageSize, skip } = pagination;
 
     const searchFilter = search
@@ -141,11 +141,17 @@ export class DoctorsService {
                   contains: search,
                   mode: 'insensitive' as const,
                 },
+              },
+            },
+            {
+              user: {
                 email: {
                   contains: search,
                   mode: 'insensitive' as const,
                 },
               },
+            },
+            {
               type: {
                 name: {
                   contains: search,
@@ -159,6 +165,7 @@ export class DoctorsService {
 
     const where: Prisma.DoctorProfileWhereInput = {
       ...searchFilter,
+      ...(typeId ? { type_id: typeId } : {}),
       deletedAt: null,
     };
 

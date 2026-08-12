@@ -1,17 +1,21 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import {
   addMinutes,
+  differenceInMinutes,
   endOfDay,
   format,
   isSameSecond,
   parse,
   startOfDay,
+  subDays,
 } from 'date-fns';
-import { Prisma } from 'generated/prisma/client';
+import { AppointmentStatus, Prisma } from 'generated/prisma/client';
 import { PaginationDto } from 'src/common/dto';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import {
@@ -20,10 +24,76 @@ import {
   UpdateScheduleDto,
 } from './dto';
 import { ScheduleListQueryDto } from './dto/list-schedule-query.dto';
+import { calculateAverageSlotDuration } from './schedule-duration';
 
 @Injectable()
 export class SchedulesService {
+  private readonly logger = new Logger(SchedulesService.name);
+
   constructor(private readonly prisma: PrismaService) {}
+
+  @Cron('0 5 0 * * *', {
+    name: 'update-doctor-slot-durations',
+    timeZone: 'Asia/Yangon',
+    waitForCompletion: true,
+  })
+  async updateSlotDurationsFromConsultationAverages() {
+    const completedAppointments = await this.prisma.appointment.findMany({
+      where: {
+        status: AppointmentStatus.COMPLETED,
+        actualStartTime: { not: null },
+        actualEndTime: {
+          not: null,
+          gte: subDays(new Date(), 30),
+        },
+      },
+      select: {
+        doctorId: true,
+        actualStartTime: true,
+        actualEndTime: true,
+      },
+    });
+
+    const durationsByDoctor = new Map<string, number[]>();
+    for (const appointment of completedAppointments) {
+      if (!appointment.actualStartTime || !appointment.actualEndTime) continue;
+
+      const duration = differenceInMinutes(
+        appointment.actualEndTime,
+        appointment.actualStartTime,
+      );
+      const durations = durationsByDoctor.get(appointment.doctorId) ?? [];
+      durations.push(duration);
+      durationsByDoctor.set(appointment.doctorId, durations);
+    }
+
+    let updatedDoctors = 0;
+    for (const [doctorId, durations] of durationsByDoctor) {
+      const slotDuration = calculateAverageSlotDuration(durations);
+      if (!slotDuration) continue;
+
+      const result = await this.prisma.schedule.updateMany({
+        where: {
+          doctor_id: doctorId,
+          isActive: true,
+          deletedAt: null,
+          slotDuration: { not: slotDuration },
+        },
+        data: { slotDuration },
+      });
+
+      if (result.count > 0) updatedDoctors += 1;
+    }
+
+    this.logger.log(
+      `Updated slot durations for ${updatedDoctors} doctor(s) from ${completedAppointments.length} completed appointment(s)`,
+    );
+
+    return {
+      updatedDoctors,
+      completedAppointments: completedAppointments.length,
+    };
+  }
 
   async findOne(id: string) {
     const schedule = await this.prisma.schedule.findUnique({
@@ -94,7 +164,7 @@ export class SchedulesService {
     pagination: PaginationDto,
     query: ScheduleListQueryDto,
   ) {
-    const { search } = query;
+    void query;
     const { pageSize, skip } = pagination;
 
     const where: Prisma.ScheduleWhereInput = {
